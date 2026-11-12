@@ -8,3 +8,4 @@ class User(Base):
     name = Column(String(100))
     email = Column(String(100), unique=True, index=True)
     password = Column(String(100)) 
+    role = Column(String(20), default="citizen") # <-- ADD THIS LINE
