@@ -5,7 +5,7 @@ from routes import auth
 import models # Important: tells the database to create the User table
 
 # Create the tables in Aiven MySQL when the app starts
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Civic Accountability Platform API"
