@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-// Added icons for each domain!
 const DOMAINS = [
   { name: "Roads", icon: "🛣️" },
   { name: "Education", icon: "🏫" },
@@ -17,12 +16,13 @@ const DOMAINS = [
 function Analytics() {
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingDomain, setUploadingDomain] = useState(null); // Tracks which card is uploading
   
-  // Check if the current user is an admin
   const user = JSON.parse(localStorage.getItem("user"));
   const isAdmin = user?.role === "admin";
 
-  useEffect(() => {
+  // Function to fetch datasets
+  const fetchDatasets = () => {
     fetch("https://civic-iwnn.onrender.com/api/admin/datasets")
       .then(res => res.json())
       .then(data => {
@@ -30,7 +30,41 @@ function Analytics() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchDatasets();
   }, []);
+
+  // Function to handle the file upload
+  const handleFileUpload = async (event, domainName) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setUploadingDomain(domainName); // Show loading state on that specific card
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("category", domainName); // Automatically set to the domain of the card
+
+    try {
+      const res = await fetch("https://civic-iwnn.onrender.com/api/admin/upload-dataset", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        alert(`✅ ${domainName} dataset uploaded successfully!`);
+        fetchDatasets(); // Refresh the data to show the new chart
+      } else {
+        alert("❌ Upload failed. Please try again.");
+      }
+    } catch (err) {
+      alert("❌ Network error. Is the backend awake? (Wait 50 seconds)");
+    } finally {
+      setUploadingDomain(null); // Stop loading state
+    }
+  };
 
   return (
     <div className="dashboard-page">
@@ -51,13 +85,6 @@ function Analytics() {
             <h1>📊 Public Data Analytics</h1>
             <p>Explore civic data uploaded by the administration.</p>
           </div>
-          
-          {/* Show this button ONLY if the user is an Admin */}
-          {isAdmin && (
-            <Link to="/admin" style={{ background: "#2563eb", color: "white", padding: "10px 20px", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>
-              ➕ Add / Upload Dataset
-            </Link>
-          )}
         </header>
 
         {loading ? (
@@ -65,24 +92,49 @@ function Analytics() {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginTop: "20px" }}>
             
-            {/* Loop through all 8 fixed domains */}
             {DOMAINS.map((domain) => {
-              // Find if a dataset exists for this specific domain
               const uploadedDataset = datasets.find((d) => d.category === domain.name);
+              const isUploading = uploadingDomain === domain.name;
 
               return (
                 <div key={domain.name} style={{ background: "white", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", minHeight: "350px", display: "flex", flexDirection: "column" }}>
                   
-                  {/* Card Header with Icon */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", borderBottom: "2px solid #e5e7eb", paddingBottom: "10px", marginBottom: "15px" }}>
-                    <span style={{ fontSize: "28px" }}>{domain.icon}</span>
-                    <h3 style={{ margin: 0, color: "#1e3a8a", fontSize: "20px" }}>
-                      {domain.name}
-                    </h3>
+                  {/* Card Header */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "2px solid #e5e7eb", paddingBottom: "10px", marginBottom: "15px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span style={{ fontSize: "28px" }}>{domain.icon}</span>
+                      <h3 style={{ margin: 0, color: "#1e3a8a", fontSize: "20px" }}>{domain.name}</h3>
+                    </div>
+                    
+                    {/* ADMIN ONLY: Upload Button inside the card */}
+                    {isAdmin && (
+                      <div>
+                        <input 
+                          type="file" 
+                          id={`upload-${domain.name}`} 
+                          style={{ display: "none" }} 
+                          accept=".csv, .xlsx" 
+                          onChange={(e) => handleFileUpload(e, domain.name)}
+                        />
+                        <label 
+                          htmlFor={`upload-${domain.name}`} 
+                          style={{ 
+                            background: isUploading ? "#9ca3af" : "#2563eb", 
+                            color: "white", 
+                            padding: "6px 12px", 
+                            borderRadius: "5px", 
+                            fontSize: "12px", 
+                            cursor: isUploading ? "not-allowed" : "pointer",
+                            fontWeight: "bold"
+                          }}
+                        >
+                          {isUploading ? "Uploading..." : (uploadedDataset ? "🔄 Replace" : "⬆️ Upload")}
+                        </label>
+                      </div>
+                    )}
                   </div>
 
                   {!uploadedDataset ? (
-                    // Beautiful Empty State
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, color: "#9ca3af" }}>
                       <span style={{ fontSize: "50px", marginBottom: "10px", opacity: 0.3 }}>{domain.icon}</span>
                       <p>No data uploaded for {domain.name} yet.</p>
@@ -93,7 +145,6 @@ function Analytics() {
                         Source File: <strong>{uploadedDataset.name}</strong>
                       </p>
                       
-                      {/* The Chart */}
                       <div style={{ width: "100%", height: 250, flex: 1 }}>
                         <ResponsiveContainer>
                           <BarChart data={JSON.parse(uploadedDataset.data_json)}>
