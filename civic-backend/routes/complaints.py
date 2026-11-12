@@ -28,3 +28,18 @@ def create_complaint(complaint: schemas.ComplaintCreate, db: Session = Depends(g
 def get_user_complaints(user_email: str, db: Session = Depends(get_db)):
     complaints = db.query(models.Complaint).filter(models.Complaint.user_email == user_email).all()
     return complaints
+# ... (keep your existing code above this) ...
+
+@router.get("/analytics")
+def get_analytics(db: Session = Depends(get_db)):
+    total = db.query(models.Complaint).count()
+    pending = db.query(models.Complaint).filter(models.Complaint.status == "Pending").count()
+    in_progress = db.query(models.Complaint).filter(models.Complaint.status == "In Progress").count()
+    resolved = db.query(models.Complaint).filter(models.Complaint.status == "Resolved").count()
+    
+    return {
+        "total": total,
+        "pending": pending,
+        "in_progress": in_progress,
+        "resolved": resolved
+    }
