@@ -1,8 +1,79 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
 function MyComplaints() {
+  const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  useEffect(() => {
+    if (user) {
+      fetch(`https://civic-iwnn.onrender.com/api/complaints/${user.email}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) setComplaints(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setLoading(false);
+        });
+    }
+  }, []);
+
   return (
-    <div style={{ padding: "40px", textAlign: "center" }}>
-      <h1>📋 My Complaints</h1>
-      <p>Your reported issues will appear here soon.</p>
+    <div className="dashboard-page">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">🏛️ CivicConnect</div>
+        <nav>
+          <Link to="/dashboard">🏠 Dashboard</Link>
+          <Link to="/report">📝 Report Issue</Link>
+          <Link to="/complaints" className="active">📋 My Complaints</Link>
+          <Link to="/analytics">📊 Public Data</Link>
+        </nav>
+        <div className="sidebar-bottom">
+          <Link to="/">🚪 Logout</Link>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="dashboard-main">
+        <header className="dashboard-header">
+          <div>
+            <h1>My Complaints</h1>
+            <p>A complete list of all the issues you have reported.</p>
+          </div>
+        </header>
+
+        <section className="dashboard-section">
+          <div className="complaint-table">
+            <div className="table-header">
+              <span>Complaint</span>
+              <span>Category</span>
+              <span>Date</span>
+              <span>Status</span>
+            </div>
+
+            {loading ? (
+              <p style={{ padding: "20px" }}>Loading your complaints...</p>
+            ) : complaints.length === 0 ? (
+              <p style={{ padding: "20px" }}>You haven't reported any issues yet.</p>
+            ) : (
+              complaints.map((c) => (
+                <div className="table-row" key={c.id}>
+                  <span>{c.title}</span>
+                  <span>{c.category}</span>
+                  <span>Today</span> {/* We can add real dates later */}
+                  <span className={`status ${c.status.toLowerCase().replace(" ", "-")}`}>
+                    {c.status}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
