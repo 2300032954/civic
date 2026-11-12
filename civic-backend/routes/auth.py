@@ -20,7 +20,8 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     # Create new user (defaults to 'citizen' role)
-    new_user = models.User(name=user.name, email=user.email, password=user.password)
+    # Inside your signup function:
+    new_user = models.User(name=user.name, email=user.email, password=user.password, role=user.role)
     
     # Save to Aiven MySQL database
     db.add(new_user)

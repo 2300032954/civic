@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
 from database import SessionLocal
 import models
+import pandas as pd
+import io
+import json
 
 router = APIRouter()
 
@@ -12,14 +15,48 @@ def get_db():
     finally:
         db.close()
 
-# Get ALL complaints from ALL users
 @router.get("/complaints")
 def get_all_complaints(db: Session = Depends(get_db)):
-    complaints = db.query(models.Complaint).all()
-    return complaints
+    return db.query(models.Complaint).all()
 
-# Get ALL users (Citizen Tracking)
 @router.get("/users")
 def get_all_users(db: Session = Depends(get_db)):
-    users = db.query(models.User).all()
-    return users
+    return db.query(models.User).all()
+
+@router.post("/upload-dataset")
+async def upload_dataset(
+    file: UploadFile = File(...), 
+    category: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    try:
+        contents = await file.read()
+        
+        # 1. Read Excel or CSV using Pandas
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(contents))
+        else:
+            df = pd.read_excel(io.BytesIO(contents))
+        
+        # 2. Preprocessing: Example - Count issues by area/type
+        # (Adjust this based on your actual Excel columns)
+        # For example, if your excel has a "Location" column:
+        column_to_group = df.columns[1] # Just grabbing the 2nd column for this example
+        summary = df[column_to_group].value_counts().reset_index()
+        summary.columns = ['name', 'value']
+        
+        # 3. Convert to JSON to send to Frontend
+        json_data = summary.to_json(orient="records")
+        
+        # 4. Save to Database
+        new_dataset = models.Dataset(name=file.filename, category=category, data_json=json_data)
+        db.add(new_dataset)
+        db.commit()
+        
+        return {"message": "Dataset processed and saved successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/datasets")
+def get_datasets(db: Session = Depends(get_db)):
+    return db.query(models.Dataset).all()

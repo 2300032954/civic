@@ -1,9 +1,8 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Text
 from database import Base
 
 class User(Base):
     __tablename__ = "users"
-
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100))
     email = Column(String(100), unique=True, index=True)
@@ -12,9 +11,15 @@ class User(Base):
 
 class Complaint(Base):
     __tablename__ = "complaints"
-
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255))
     category = Column(String(100))
     status = Column(String(50), default="Pending")
     user_email = Column(String(100))
+
+class Dataset(Base):
+    __tablename__ = "datasets"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255))
+    category = Column(String(100)) # e.g., Roads, Healthcare
+    data_json = Column(Text) # Stores the chart data

@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function Signup() {
-  // 1. Create state to hold the form data
+  // 1. Create state to hold the form data (Added role)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    role: "citizen" // Default role
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +31,6 @@ function Signup() {
     setLoading(true);
 
     try {
-      // 🚨 CHANGED TO /auth/signup to match the backend!
       const response = await fetch("https://civic-iwnn.onrender.com/auth/signup", {
         method: "POST",
         headers: {
@@ -40,6 +40,7 @@ function Signup() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          role: formData.role, // Send the selected role to backend
         }),
       });
 
@@ -92,6 +93,25 @@ function Signup() {
             onChange={handleChange}
             required
           />
+
+          {/* NEW ROLE DROPDOWN */}
+          <label>Register As</label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginBottom: "15px",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+              fontSize: "16px"
+            }}
+          >
+            <option value="citizen">Citizen</option>
+            <option value="admin">Admin</option>
+          </select>
 
           <label>Password</label>
           <input
