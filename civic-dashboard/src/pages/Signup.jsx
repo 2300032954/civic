@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function Signup() {
-  // 1. Create state to hold the form data (Added role)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,14 +13,12 @@ function Signup() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // 2. Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 3. Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // 🛑 STOPS the page from refreshing
+    e.preventDefault();
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
@@ -33,14 +30,12 @@ function Signup() {
     try {
       const response = await fetch("https://civic-iwnn.onrender.com/auth/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: formData.role, // Send the selected role to backend
+          role: formData.role, // Send the selected role
         }),
       });
 
@@ -50,7 +45,6 @@ function Signup() {
         throw new Error(data.detail || "Failed to create account");
       }
 
-      // Success! Redirect to login page
       alert("Account created successfully! Please log in.");
       navigate("/login");
 
@@ -66,72 +60,34 @@ function Signup() {
       <div className="auth-card">
         <div className="auth-logo">🏛️ CivicConnect</div>
         <h1>Create Account</h1>
-        <p className="auth-subtitle">
-          Join CivicConnect and help improve your community
-        </p>
+        <p className="auth-subtitle">Join CivicConnect and help improve your community</p>
 
-        {/* Show error message if there is one */}
         {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
 
         <form onSubmit={handleSubmit}>
           <label>Full Name</label>
-          <input
-            type="text"
-            name="name"
-            placeholder="Enter your full name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
+          <input type="text" name="name" placeholder="Enter your full name" value={formData.name} onChange={handleChange} required />
 
           <label>Email Address</label>
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+          <input type="email" name="email" placeholder="Enter your email" value={formData.email} onChange={handleChange} required />
 
-          {/* NEW ROLE DROPDOWN */}
+          {/* 🚨 THIS IS THE DROPDOWN YOU ARE LOOKING FOR */}
           <label>Register As</label>
           <select
             name="role"
             value={formData.role}
             onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "12px",
-              marginBottom: "15px",
-              borderRadius: "8px",
-              border: "1px solid #ccc",
-              fontSize: "16px"
-            }}
+            style={{ width: "100%", padding: "12px", marginBottom: "15px", borderRadius: "8px", border: "1px solid #ccc", fontSize: "16px" }}
           >
             <option value="citizen">Citizen</option>
             <option value="admin">Admin</option>
           </select>
 
           <label>Password</label>
-          <input
-            type="password"
-            name="password"
-            placeholder="Create a password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+          <input type="password" name="password" placeholder="Create a password" value={formData.password} onChange={handleChange} required />
 
           <label>Confirm Password</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="Confirm your password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-          />
+          <input type="password" name="confirmPassword" placeholder="Confirm your password" value={formData.confirmPassword} onChange={handleChange} required />
 
           <button type="submit" className="auth-btn" disabled={loading}>
             {loading ? "Creating Account... (Please wait)" : "Create Account"}
