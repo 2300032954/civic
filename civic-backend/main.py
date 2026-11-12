@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
-from routes import auth, complaints # <-- Added complaints here
+from routes import auth, complaints, admin # <-- Added admin here
 import models 
 
 # Create the tables in Aiven MySQL when the app starts
@@ -21,7 +21,8 @@ app.add_middleware(
 
 # Connect the routes
 app.include_router(auth.router, prefix="/auth")
-app.include_router(complaints.router, prefix="/api") # <-- Added this line
+app.include_router(complaints.router, prefix="/api")
+app.include_router(admin.router, prefix="/api/admin") # <-- Added this line
 
 @app.get("/")
 def home():
