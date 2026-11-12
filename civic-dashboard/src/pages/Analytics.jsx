@@ -2,6 +2,18 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
+// The 8 fixed domains
+const DOMAINS = [
+  "Roads",
+  "Education",
+  "Healthcare",
+  "Sanitation",
+  "Water Supply",
+  "Electricity",
+  "Transport",
+  "Other"
+];
+
 function Analytics() {
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,27 +49,45 @@ function Analytics() {
           </div>
         </header>
 
-        {loading ? <p>Loading charts...</p> : datasets.length === 0 ? <p>No datasets uploaded yet.</p> : (
+        {loading ? (
+          <p>Loading datasets... (Backend might be waking up)</p>
+        ) : (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-            {datasets.map((ds) => {
-              // Convert the JSON string from the database back into an array
-              const chartData = JSON.parse(ds.data_json);
+            
+            {/* Loop through all 8 fixed domains */}
+            {DOMAINS.map((domain) => {
+              // Find if a dataset exists for this specific domain
+              const uploadedDataset = datasets.find((d) => d.category === domain);
+
               return (
-                <div key={ds.id} style={{ background: "white", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}>
-                  <h3 style={{ marginBottom: "15px", color: "#1e3a8a" }}>{ds.category} Data</h3>
-                  <p style={{ fontSize: "12px", color: "gray", marginBottom: "20px" }}>Source: {ds.name}</p>
-                  
-                  {/* The Chart */}
-                  <div style={{ width: "100%", height: 300 }}>
-                    <ResponsiveContainer>
-                      <BarChart data={chartData}>
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+                <div key={domain} style={{ background: "white", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", minHeight: "350px" }}>
+                  <h3 style={{ marginBottom: "10px", color: "#1e3a8a", borderBottom: "2px solid #e5e7eb", paddingBottom: "10px" }}>
+                    {domain}
+                  </h3>
+
+                  {!uploadedDataset ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "250px", color: "#9ca3af" }}>
+                      <p>No data uploaded for {domain} yet.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <p style={{ fontSize: "12px", color: "gray", marginBottom: "15px" }}>
+                        Source: {uploadedDataset.name}
+                      </p>
+                      
+                      {/* The Chart */}
+                      <div style={{ width: "100%", height: 250 }}>
+                        <ResponsiveContainer>
+                          <BarChart data={JSON.parse(uploadedDataset.data_json)}>
+                            <XAxis dataKey="name" tick={{fontSize: 12}} />
+                            <YAxis tick={{fontSize: 12}} />
+                            <Tooltip />
+                            <Bar dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })}
