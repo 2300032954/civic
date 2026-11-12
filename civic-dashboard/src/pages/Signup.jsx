@@ -30,8 +30,8 @@ function Signup() {
     setLoading(true);
 
     try {
-      // 🚨 IMPORTANT: Check your routes/auth.py to see if it is /signup or /auth/signup
-      const response = await fetch("https://civic-iwnn.onrender.com/signup", {
+      // 🚨 CHANGED TO /auth/signup to match the backend!
+      const response = await fetch("https://civic-iwnn.onrender.com/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
