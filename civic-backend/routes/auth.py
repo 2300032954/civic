@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import SessionLocal
 import models, schemas
+from datetime import datetime # <-- Added for tracking time
 
 router = APIRouter()
 
@@ -19,8 +20,7 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    # Create new user (defaults to 'citizen' role)
-    # Inside your signup function:
+    # Create new user
     new_user = models.User(name=user.name, email=user.email, password=user.password, role=user.role)
     
     # Save to Aiven MySQL database
@@ -41,6 +41,14 @@ def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db_user.password != user.password:
         raise HTTPException(status_code=400, detail="Incorrect password")
     
+    # 🚨 TRACKING LOGIC: Update login count and last active time
+    if db_user.login_count is None:
+        db_user.login_count = 0
+        
+    db_user.login_count += 1
+    db_user.last_login = datetime.utcnow()
+    db.commit()
+
     # Return user data INCLUDING the role so React knows where to redirect
     return {
         "message": "Login successful", 

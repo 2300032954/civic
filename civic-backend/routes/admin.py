@@ -85,3 +85,31 @@ def update_complaint_status(complaint_id: int, status_update: ComplaintStatusUpd
     complaint.status = status_update.status
     db.commit()
     return {"message": "Complaint status updated successfully"}
+# Add this at the bottom of admin.py
+@router.get("/tracking")
+def get_tracking_data(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    
+    total_users = len(users)
+    total_citizens = len([u for u in users if u.role == "citizen"])
+    total_admins = len([u for u in users if u.role == "admin"])
+    total_logins = sum(u.login_count for u in users if u.login_count)
+    
+    user_data = []
+    for u in users:
+        user_data.append({
+            "id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "role": u.role,
+            "login_count": u.login_count or 0,
+            "last_login": u.last_login.strftime("%Y-%m-%d %H:%M:%S") if u.last_login else "Never"
+        })
+        
+    return {
+        "total_users": total_users,
+        "total_citizens": total_citizens,
+        "total_admins": total_admins,
+        "total_logins": total_logins,
+        "users": user_data
+    }
