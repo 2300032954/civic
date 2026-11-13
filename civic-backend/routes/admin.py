@@ -69,3 +69,19 @@ def delete_dataset(dataset_id: int, db: Session = Depends(get_db)):
     db.delete(dataset)
     db.commit()
     return {"message": "Dataset deleted successfully"}
+# ... (keep your existing routes) ...
+
+from pydantic import BaseModel
+
+class ComplaintStatusUpdate(BaseModel):
+    status: str
+
+@router.put("/complaints/{complaint_id}")
+def update_complaint_status(complaint_id: int, status_update: ComplaintStatusUpdate, db: Session = Depends(get_db)):
+    complaint = db.query(models.Complaint).filter(models.Complaint.id == complaint_id).first()
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found")
+    
+    complaint.status = status_update.status
+    db.commit()
+    return {"message": "Complaint status updated successfully"}
