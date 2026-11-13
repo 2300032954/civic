@@ -1,9 +1,16 @@
-import { useState, useEffect } from "react"; // <-- Added useEffect
-import { Link, useNavigate } from "react-router-dom"; // <-- Added useNavigate
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function ReportComplaint() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const [photo, setPhoto] = useState(null);
+  const [location, setLocation] = useState("");
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // 🛑 THE SECURITY GUARD: Kick Admins out of Citizen pages
   useEffect(() => {
@@ -12,7 +19,12 @@ function ReportComplaint() {
     }
   }, [user, navigate]);
 
-  // ... (keep the rest of your ReportComplaint code exactly the same) ...
+  const handlePhotoChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setPhoto(URL.createObjectURL(file));
+    }
+  };
 
   const getLocation = () => {
     if (!navigator.geolocation) {
@@ -32,12 +44,10 @@ function ReportComplaint() {
     );
   };
 
-  // 2. Add the submit handler
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Stop page refresh
+    e.preventDefault();
     setLoading(true);
 
-    const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
       alert("You must be logged in to report an issue.");
       navigate("/login");
@@ -45,7 +55,6 @@ function ReportComplaint() {
     }
 
     try {
-      // Send data to the Render backend
       const response = await fetch("https://civic-iwnn.onrender.com/api/complaints", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -58,7 +67,7 @@ function ReportComplaint() {
 
       if (response.ok) {
         alert("Complaint submitted successfully!");
-        navigate("/dashboard"); // Go back to dashboard
+        navigate("/dashboard"); 
       } else {
         alert("Failed to submit complaint.");
       }
@@ -91,27 +100,15 @@ function ReportComplaint() {
         </div>
 
         <div className="complaint-form-card">
-          {/* 3. Connect the form to handleSubmit */}
           <form onSubmit={handleSubmit}>
-            
             <div className="form-group">
               <label>Issue Title</label>
-              <input
-                type="text"
-                placeholder="Example: Large pothole near main road"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
+              <input type="text" placeholder="Example: Large pothole near main road" value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
 
             <div className="form-group">
               <label>Category</label>
-              <select 
-                value={category} 
-                onChange={(e) => setCategory(e.target.value)}
-                required
-              >
+              <select value={category} onChange={(e) => setCategory(e.target.value)} required>
                 <option value="" disabled>Select issue category</option>
                 <option>Road & Infrastructure</option>
                 <option>Street Lights</option>
@@ -125,12 +122,7 @@ function ReportComplaint() {
 
             <div className="form-group">
               <label>Description (Optional)</label>
-              <textarea
-                rows="5"
-                placeholder="Describe the issue in detail..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              ></textarea>
+              <textarea rows="5" placeholder="Describe the issue in detail..." value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
             </div>
 
             <div className="form-group">
@@ -160,12 +152,7 @@ function ReportComplaint() {
             <div className="form-group">
               <label>Location (Optional)</label>
               <div className="location-input">
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Enter issue location"
-                />
+                <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Enter issue location" />
                 <button type="button" className="location-btn" onClick={getLocation}>
                   📍 Get Location
                 </button>
