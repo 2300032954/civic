@@ -21,7 +21,6 @@ function AdminDashboard() {
   const handleFileUpload = async (event, domainName) => {
     const file = event.target.files[0];
     if (!file) return;
-
     setUploadingDomain(domainName);
     const formData = new FormData();
     formData.append("file", file);
@@ -32,7 +31,6 @@ function AdminDashboard() {
         method: "POST",
         body: formData,
       });
-
       if (res.ok) {
         alert(`✅ ${domainName} dataset uploaded successfully!`);
         fetchDatasets();
@@ -48,14 +46,13 @@ function AdminDashboard() {
 
   const handleDelete = async (datasetId) => {
     if (!window.confirm("Are you sure you want to delete this file?")) return;
-    
     try {
       const res = await fetch(`https://civic-iwnn.onrender.com/api/admin/datasets/${datasetId}`, {
         method: "DELETE",
       });
       if (res.ok) {
         alert("🗑️ File deleted successfully.");
-        fetchDatasets(); // Refresh list
+        fetchDatasets();
       } else {
         alert("❌ Failed to delete file.");
       }
@@ -85,11 +82,8 @@ function AdminDashboard() {
 
             return (
               <div key={domain} style={{ background: "white", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}>
-                
-                {/* Header of Domain Card */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #e5e7eb", paddingBottom: "10px", marginBottom: "15px" }}>
                   <h3 style={{ margin: 0, color: "#1e3a8a" }}>{domain}</h3>
-                  
                   <div>
                     <input type="file" id={`upload-${domain}`} style={{ display: "none" }} accept=".csv, .xlsx" onChange={(e) => handleFileUpload(e, domain)} />
                     <label htmlFor={`upload-${domain}`} style={{ background: uploadingDomain === domain ? "#ccc" : "#2563eb", color: "white", padding: "8px 15px", borderRadius: "5px", cursor: uploadingDomain === domain ? "not-allowed" : "pointer", fontWeight: "bold" }}>
@@ -98,7 +92,6 @@ function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* List of Files for this Domain */}
                 {domainFiles.length === 0 ? (
                   <p style={{ color: "gray", fontSize: "14px" }}>No files uploaded yet.</p>
                 ) : (
