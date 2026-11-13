@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // <-- Added useNavigate
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const DOMAINS = [
@@ -18,9 +18,19 @@ function Analytics() {
   const [loading, setLoading] = useState(true);
   
   const [selectedDomain, setSelectedDomain] = useState(null);
-  const [showVisualization, setShowVisualization] = useState(false); // Tracks if we should show the chart
+  const [showVisualization, setShowVisualization] = useState(false); 
+
+  const navigate = useNavigate(); // <-- Initialize navigate
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
+    // 🛑 THE SECURITY GUARD: Kick Admins out of Citizen pages
+    if (user?.role === "admin") {
+      navigate("/admin");
+      return; // Stop the rest of the code from running
+    }
+
+    // Normal fetch for Citizens
     fetch("https://civic-iwnn.onrender.com/api/admin/datasets")
       .then(res => res.json())
       .then(data => {
@@ -28,7 +38,7 @@ function Analytics() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, [user, navigate]); // <-- Added dependencies
 
   // Helper to get the current dataset
   const currentDataset = selectedDomain ? datasets.find(d => d.category === selectedDomain) : null;

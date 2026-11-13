@@ -1,12 +1,20 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // <-- Added useNavigate
 
 function MyComplaints() {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = JSON.parse(localStorage.getItem("user"));
+  const navigate = useNavigate(); // <-- Initialize navigate
 
   useEffect(() => {
+    // 🛑 THE SECURITY GUARD: Kick Admins out of Citizen pages
+    if (user?.role === "admin") {
+      navigate("/admin");
+      return; // Stop the rest of the code from running
+    }
+
+    // Normal fetch for Citizens
     if (user) {
       fetch(`https://civic-iwnn.onrender.com/api/complaints/${user.email}`)
         .then((res) => res.json())
@@ -19,7 +27,7 @@ function MyComplaints() {
           setLoading(false);
         });
     }
-  }, []);
+  }, [user, navigate]); // Added dependencies
 
   return (
     <div className="dashboard-page">

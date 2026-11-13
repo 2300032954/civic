@@ -1,24 +1,18 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react"; // <-- Added useEffect
+import { Link, useNavigate } from "react-router-dom"; // <-- Added useNavigate
 
 function ReportComplaint() {
-  const [photo, setPhoto] = useState(null);
-  const [location, setLocation] = useState("");
-  
-  // 1. Add state for the form data
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
-  
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  const handlePhotoChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setPhoto(URL.createObjectURL(file));
+  // 🛑 THE SECURITY GUARD: Kick Admins out of Citizen pages
+  useEffect(() => {
+    if (user?.role === "admin") {
+      navigate("/admin");
     }
-  };
+  }, [user, navigate]);
+
+  // ... (keep the rest of your ReportComplaint code exactly the same) ...
 
   const getLocation = () => {
     if (!navigator.geolocation) {
