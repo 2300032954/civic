@@ -618,76 +618,155 @@ body {
   border-radius: 10px;
   border: 1px solid #cbd5e1;
 }
+
 /* =========================================
-   MOBILE RESPONSIVE DESIGN
+   MOBILE RESPONSIVE DESIGN (UPDATED)
    ========================================= */
 @media screen and (max-width: 768px) {
   
-  /* 1. Stack the sidebar on top of the main content */
+  /* --- NAVBAR / HERO FIXES --- */
+  .navbar { padding: 0 15px; }
+  .nav-links { display: none; /* Hide desktop links on mobile */ }
+  .hero h1 { font-size: 36px !important; }
+  .hero-buttons { flex-direction: column; gap: 10px; }
+  .feature-container, .steps { flex-direction: column; align-items: center; }
+  .feature-card { width: 100%; margin-bottom: 15px; }
+
+  /* --- DASHBOARD LAYOUT --- */
   .dashboard-page {
     flex-direction: column !important;
     height: auto !important;
     min-height: 100vh !important;
   }
 
-  /* 2. Make the sidebar full width and horizontal */
+  /* --- SIDEBAR -> TOP NAV BAR --- */
   .sidebar {
     width: 100% !important;
+    min-height: auto !important;
     height: auto !important;
-    position: relative !important;
-    padding-bottom: 10px !important;
+    padding: 15px 10px !important;
+    border-bottom: 2px solid #1e293b;
   }
 
+  .sidebar-logo {
+    margin-bottom: 15px !important;
+    padding: 0 10px !important;
+    font-size: 18px !important;
+  }
+
+  /* Horizontal Swipeable Menu */
   .sidebar nav {
     display: flex !important;
     flex-direction: row !important;
-    overflow-x: auto !important; /* Allows scrolling left/right if too many links */
-    white-space: nowrap !important;
-    padding-bottom: 10px !important;
+    overflow-x: auto !important;
+    gap: 10px !important;
+    padding-bottom: 5px !important;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+  }
+  
+  .sidebar nav::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
   }
 
+  /* Style the links/buttons like pills */
   .sidebar nav a, 
   .sidebar nav button {
-    padding: 10px 15px !important;
+    width: auto !important;
+    padding: 10px 18px !important;
     font-size: 14px !important;
+    white-space: nowrap !important;
+    border-radius: 20px !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    margin: 0 !important;
   }
 
-  /* 3. Make main content full width */
+  /* Make the active button stand out */
+  .sidebar nav a.active,
+  .sidebar nav button[style*="rgb(37, 99, 235)"] {
+    background-color: #2563eb !important;
+    font-weight: bold !important;
+  }
+
+  /* Logout button positioning */
+  .sidebar-bottom {
+    margin-top: 15px !important;
+    padding: 0 10px !important;
+  }
+
+  /* --- MAIN CONTENT --- */
   .dashboard-main {
     width: 100% !important;
-    padding: 15px !important;
+    padding: 20px 15px !important;
   }
 
-  /* 4. Stack the 2-column grids into 1 column */
-  /* This affects Analytics, Admin Datasets, and Tracking */
-  [style*="grid-template-columns: 1fr 1fr"],
+  .dashboard-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 15px !important;
+  }
+
+  .dashboard-header h1 { font-size: 24px !important; }
+
+  /* --- GRIDS (Stats, Quick Actions, Admin Domains) --- */
+  .stats-container {
+    grid-template-columns: 1fr 1fr !important; /* 2 columns on mobile */
+    gap: 10px !important;
+  }
+  
+  .stat-card {
+    padding: 15px !important;
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 5px !important;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr !important; /* 1 column */
+  }
+
+  /* Force inline grid styles (Admin) to 1 column */
   [style*="gridTemplateColumns: '1fr 1fr'"],
+  [style*="grid-template-columns: 1fr 1fr"],
+  [style*="gridTemplateColumns: '1fr 1fr 1fr 1fr'"],
   [style*="grid-template-columns: 1fr 1fr 1fr 1fr"] {
     grid-template-columns: 1fr !important;
   }
 
-  /* 5. Make the Tables scrollable horizontally */
+  /* --- TABLES (Make them scrollable sideways) --- */
   .complaint-table {
     overflow-x: auto !important;
     display: block !important;
-    white-space: nowrap !important;
+    border-radius: 10px;
   }
 
-  /* 6. Adjust fonts and padding for smaller screens */
-  .dashboard-header h1 {
-    font-size: 24px !important;
+  .table-header,
+  .table-row {
+    min-width: 600px !important; /* Forces table to be wide enough to scroll */
+    padding: 15px !important;
+    font-size: 14px !important;
+  }
+
+  /* --- FORMS --- */
+  .auth-card, .complaint-form-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 20px !important;
   }
   
-  .dashboard-header {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 10px !important;
+  .auth-page {
+    padding: 15px !important;
   }
 
-  /* Make the Logout button fit better */
-  .sidebar-bottom {
-    position: relative !important;
-    margin-top: 15px !important;
-    padding-left: 15px !important;
+  .location-input {
+    flex-direction: column !important;
+  }
+
+  .location-btn {
+    padding: 12px !important;
+  }
+
+  .photo-preview img {
+    width: 100% !important;
   }
 }
