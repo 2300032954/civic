@@ -7,13 +7,19 @@ const DOMAINS = [
 ];
 
 function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("complaints"); 
+  const [activeTab, setActiveTab] = useState("complaints"); // "complaints", "datasets", or "tracking"
   
+  // States for Datasets
   const [datasets, setDatasets] = useState([]);
   const [uploadingDomain, setUploadingDomain] = useState(null);
+  
+  // States for Complaints
   const [complaints, setComplaints] = useState([]);
+
+  // States for Tracking
   const [tracking, setTracking] = useState({ total_users: 0, total_citizens: 0, total_admins: 0, total_logins: 0, users: [] });
 
+  // Fetch Data Functions
   const fetchDatasets = () => {
     fetch("https://civic-iwnn.onrender.com/api/admin/datasets")
       .then(res => res.json())
@@ -38,8 +44,8 @@ function AdminDashboard() {
     fetchTracking();
   }, []);
 
+  // Handlers
   const handleFileUpload = async (event, domainName) => {
-    // ... (keep your existing upload logic) ...
     const file = event.target.files[0];
     if (!file) return;
     setUploadingDomain(domainName);
@@ -53,7 +59,6 @@ function AdminDashboard() {
   };
 
   const handleDeleteDataset = async (datasetId) => {
-    // ... (keep your existing delete logic) ...
     if (!window.confirm("Are you sure?")) return;
     try {
       const res = await fetch(`https://civic-iwnn.onrender.com/api/admin/datasets/${datasetId}`, { method: "DELETE" });
@@ -62,7 +67,6 @@ function AdminDashboard() {
   };
 
   const handleStatusChange = async (complaintId, newStatus) => {
-    // ... (keep your existing status logic) ...
     try {
       const res = await fetch(`https://civic-iwnn.onrender.com/api/admin/complaints/${complaintId}`, {
         method: "PUT",
@@ -73,41 +77,70 @@ function AdminDashboard() {
     } catch (err) { alert("❌ Network error."); }
   };
 
+  // Helper for Sidebar Button Styling
+  const sidebarBtnStyle = (tabName) => ({
+    background: "transparent",
+    border: "none",
+    color: "white",
+    textAlign: "left",
+    padding: "15px 20px",
+    fontSize: "16px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    width: "100%",
+    fontWeight: activeTab === tabName ? "bold" : "normal",
+    backgroundColor: activeTab === tabName ? "#2563eb" : "transparent",
+    borderRadius: "8px",
+    marginBottom: "5px",
+    transition: "0.2s"
+  });
+
   return (
     <div className="dashboard-page">
+      
+      {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="sidebar-logo">🏛️ Admin Panel</div>
-        <nav>
-          <Link to="/admin" className="active">📊 Dashboard</Link>
-          <Link to="/">🚪 Logout</Link>
+        
+        <nav style={{ display: "flex", flexDirection: "column", padding: "0 10px" }}>
+          <button onClick={() => setActiveTab("complaints")} style={sidebarBtnStyle("complaints")}>
+            📝 Manage Complaints
+          </button>
+          <button onClick={() => setActiveTab("datasets")} style={sidebarBtnStyle("datasets")}>
+            📁 Manage Datasets
+          </button>
+          <button onClick={() => setActiveTab("tracking")} style={sidebarBtnStyle("tracking")}>
+            👥 Citizen Tracking
+          </button>
         </nav>
+
+        {/* LOGOUT AT THE BOTTOM */}
+        <div className="sidebar-bottom">
+          <Link to="/">🚪 Logout</Link>
+        </div>
       </aside>
 
+      {/* MAIN CONTENT */}
       <main className="dashboard-main">
         <header className="dashboard-header">
           <div>
-            <h1>Admin Control Center</h1>
-            <p>Manage complaints, datasets, and citizen activity.</p>
+            <h1>
+              {activeTab === "complaints" && "Manage Complaints"}
+              {activeTab === "datasets" && "Manage Datasets"}
+              {activeTab === "tracking" && "Citizen Tracking"}
+            </h1>
+            <p>
+              {activeTab === "complaints" && "Review and update the status of citizen reports."}
+              {activeTab === "datasets" && "Upload and manage Excel datasets for the public data portal."}
+              {activeTab === "tracking" && "View user activity, login counts, and last active times."}
+            </p>
           </div>
         </header>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button onClick={() => setActiveTab("complaints")} style={{ padding: "10px 20px", background: activeTab === "complaints" ? "#2563eb" : "#e5e7eb", color: activeTab === "complaints" ? "white" : "black", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
-            📝 Manage Complaints
-          </button>
-          <button onClick={() => setActiveTab("datasets")} style={{ padding: "10px 20px", background: activeTab === "datasets" ? "#2563eb" : "#e5e7eb", color: activeTab === "datasets" ? "white" : "black", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
-            📁 Manage Datasets
-          </button>
-          {/* NEW TAB */}
-          <button onClick={() => setActiveTab("tracking")} style={{ padding: "10px 20px", background: activeTab === "tracking" ? "#2563eb" : "#e5e7eb", color: activeTab === "tracking" ? "white" : "black", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
-            👥 Citizen Tracking
-          </button>
-        </div>
-
         {/* --- TAB 1: COMPLAINTS --- */}
         {activeTab === "complaints" && (
-          /* ... (Keep your existing Complaints table code here) ... */
           <div className="complaint-table" style={{ background: "white", borderRadius: "10px", padding: "20px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}>
             <div className="table-header" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 2fr 1.5fr", fontWeight: "bold", borderBottom: "2px solid #e5e7eb", paddingBottom: "10px", marginBottom: "10px" }}>
               <span>Issue</span><span>Category</span><span>Reported By</span><span>Status</span>
@@ -127,7 +160,6 @@ function AdminDashboard() {
 
         {/* --- TAB 2: DATASETS --- */}
         {activeTab === "datasets" && (
-          /* ... (Keep your existing Datasets code here) ... */
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             {DOMAINS.map((domain) => {
               const domainFiles = datasets.filter((d) => d.category === domain);
@@ -158,7 +190,7 @@ function AdminDashboard() {
           </div>
         )}
 
-        {/* --- TAB 3: CITIZEN TRACKING (NEW) --- */}
+        {/* --- TAB 3: CITIZEN TRACKING --- */}
         {activeTab === "tracking" && (
           <div>
             {/* Stat Cards */}
