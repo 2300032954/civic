@@ -60,3 +60,12 @@ async def upload_dataset(
 @router.get("/datasets")
 def get_datasets(db: Session = Depends(get_db)):
     return db.query(models.Dataset).all()
+@router.delete("/datasets/{dataset_id}")
+def delete_dataset(dataset_id: int, db: Session = Depends(get_db)):
+    dataset = db.query(models.Dataset).filter(models.Dataset.id == dataset_id).first()
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    
+    db.delete(dataset)
+    db.commit()
+    return {"message": "Dataset deleted successfully"}
