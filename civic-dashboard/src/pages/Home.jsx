@@ -1,6 +1,41 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function Home() {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  // Check if someone is logged in when the page loads
+  useEffect(() => {
+    const loggedInUser = JSON.parse(localStorage.getItem("user"));
+    if (loggedInUser) {
+      setUser(loggedInUser);
+    }
+  }, []);
+
+  // Smart logic for "Report an Issue"
+  const handleReportClick = () => {
+    if (!user) {
+      navigate("/login"); // Not logged in -> go to login
+    } else if (user.role === "admin") {
+      alert("Admins cannot report issues. Please use a Citizen account for that.");
+      navigate("/admin"); // Admin -> go to admin dashboard
+    } else {
+      navigate("/report"); // Citizen -> go to report form
+    }
+  };
+
+  // Smart logic for "Explore Data"
+  const handleExploreClick = () => {
+    if (!user) {
+      navigate("/login"); 
+    } else if (user.role === "admin") {
+      navigate("/admin"); // Admin -> go to admin dashboard
+    } else {
+      navigate("/analytics"); // Citizen -> go to public data
+    }
+  };
+
   return (
     <div className="home-page">
 
@@ -12,8 +47,18 @@ function Home() {
 
         <div className="nav-links">
           <Link to="/">Home</Link>
-          <Link to="/login">Login</Link>
-          <Link to="/signup">Sign Up</Link>
+          
+          {/* Show Dashboard if logged in, otherwise show Login/Signup */}
+          {user ? (
+            <Link to={user.role === "admin" ? "/admin" : "/dashboard"} style={{ fontWeight: "bold", color: "#1d4ed8" }}>
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link to="/login">Login</Link>
+              <Link to="/signup">Sign Up</Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -32,13 +77,20 @@ function Home() {
           </p>
 
           <div className="hero-buttons">
-            <Link to="/report" className="primary-btn">
-              Report an Issue
-            </Link>
+            {/* Change button text based on role */}
+            {user?.role === "admin" ? (
+              <button className="primary-btn" onClick={() => navigate("/admin")}>
+                Go to Admin Dashboard
+              </button>
+            ) : (
+              <button className="primary-btn" onClick={handleReportClick}>
+                Report an Issue
+              </button>
+            )}
 
-            <Link to="/analytics" className="secondary-btn">
+            <button className="secondary-btn" onClick={handleExploreClick}>
               Explore Data
-            </Link>
+            </button>
           </div>
         </div>
 
