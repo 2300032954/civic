@@ -7,19 +7,13 @@ const DOMAINS = [
 ];
 
 function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("complaints"); // "complaints", "datasets", or "tracking"
+  const [activeTab, setActiveTab] = useState("complaints"); 
   
-  // States for Datasets
   const [datasets, setDatasets] = useState([]);
   const [uploadingDomain, setUploadingDomain] = useState(null);
-  
-  // States for Complaints
   const [complaints, setComplaints] = useState([]);
-
-  // States for Tracking
   const [tracking, setTracking] = useState({ total_users: 0, total_citizens: 0, total_admins: 0, total_logins: 0, users: [] });
 
-  // Fetch Data Functions
   const fetchDatasets = () => {
     fetch("https://civic-iwnn.onrender.com/api/admin/datasets")
       .then(res => res.json())
@@ -44,7 +38,6 @@ function AdminDashboard() {
     fetchTracking();
   }, []);
 
-  // Handlers
   const handleFileUpload = async (event, domainName) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -77,23 +70,21 @@ function AdminDashboard() {
     } catch (err) { alert("❌ Network error."); }
   };
 
-  // Helper for Sidebar Button Styling
   const sidebarBtnStyle = (tabName) => ({
-    background: "transparent",
+    background: activeTab === tabName ? "linear-gradient(135deg, rgba(37, 99, 235, 0.8), rgba(6, 182, 212, 0.8))" : "transparent",
     border: "none",
-    color: "white",
+    color: activeTab === tabName ? "white" : "#94a3b8",
     textAlign: "left",
-    padding: "15px 20px",
-    fontSize: "16px",
+    padding: "14px 18px",
+    fontSize: "15px",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     gap: "10px",
     width: "100%",
-    fontWeight: activeTab === tabName ? "bold" : "normal",
-    backgroundColor: activeTab === tabName ? "#2563eb" : "transparent",
-    borderRadius: "8px",
-    marginBottom: "5px",
+    fontWeight: activeTab === tabName ? "600" : "500",
+    borderRadius: "12px",
+    marginBottom: "8px",
     transition: "0.2s"
   });
 
@@ -104,7 +95,7 @@ function AdminDashboard() {
       <aside className="sidebar">
         <div className="sidebar-logo">🏛️ Admin Panel</div>
         
-        <nav style={{ display: "flex", flexDirection: "column", padding: "0 10px" }}>
+        <nav style={{ display: "flex", flexDirection: "column" }}>
           <button onClick={() => setActiveTab("complaints")} style={sidebarBtnStyle("complaints")}>
             📝 Manage Complaints
           </button>
@@ -116,7 +107,6 @@ function AdminDashboard() {
           </button>
         </nav>
 
-        {/* LOGOUT AT THE BOTTOM */}
         <div className="sidebar-bottom">
           <Link to="/">🚪 Logout</Link>
         </div>
@@ -141,16 +131,29 @@ function AdminDashboard() {
 
         {/* --- TAB 1: COMPLAINTS --- */}
         {activeTab === "complaints" && (
-          <div className="complaint-table" style={{ background: "white", borderRadius: "10px", padding: "20px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}>
-            <div className="table-header" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 2fr 1.5fr", fontWeight: "bold", borderBottom: "2px solid #e5e7eb", paddingBottom: "10px", marginBottom: "10px" }}>
+          <div className="complaint-table">
+            <div className="table-header" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 2fr 1.5fr" }}>
               <span>Issue</span><span>Category</span><span>Reported By</span><span>Status</span>
             </div>
-            {complaints.length === 0 ? <p style={{ textAlign: "center", padding: "20px", color: "gray" }}>No complaints reported yet.</p> : 
+            {complaints.length === 0 ? <p style={{ textAlign: "center", padding: "30px", color: "#94a3b8" }}>No complaints reported yet.</p> : 
               complaints.map((c) => (
-                <div key={c.id} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 2fr 1.5fr", alignItems: "center", borderBottom: "1px solid #f3f4f6", padding: "15px 0" }}>
-                  <span style={{ fontWeight: "bold" }}>{c.title}</span><span>{c.category}</span><span style={{ fontSize: "14px", color: "gray" }}>{c.user_email}</span>
-                  <select value={c.status} onChange={(e) => handleStatusChange(c.id, e.target.value)} style={{ padding: "8px", borderRadius: "5px", border: "1px solid #ccc", background: c.status === "Pending" ? "#fef3c7" : c.status === "In Progress" ? "#dbeafe" : "#dcfce7", fontWeight: "bold", cursor: "pointer" }}>
-                    <option value="Pending">⏳ Pending</option><option value="In Progress">🔄 In Progress</option><option value="Resolved">✅ Resolved</option>
+                <div key={c.id} className="table-row" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 2fr 1.5fr" }}>
+                  <span style={{ fontWeight: "600", color: "white" }}>{c.title}</span>
+                  <span>{c.category}</span>
+                  <span style={{ fontSize: "14px", color: "#94a3b8" }}>{c.user_email}</span>
+                  <select 
+                    value={c.status} 
+                    onChange={(e) => handleStatusChange(c.id, e.target.value)} 
+                    style={{ 
+                      padding: "8px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", 
+                      background: c.status === "Pending" ? "rgba(245, 158, 11, 0.2)" : c.status === "In Progress" ? "rgba(59, 130, 246, 0.2)" : "rgba(16, 185, 129, 0.2)", 
+                      color: c.status === "Pending" ? "#fbbf24" : c.status === "In Progress" ? "#60a5fa" : "#34d399",
+                      fontWeight: "bold", cursor: "pointer", outline: "none"
+                    }}
+                  >
+                    <option style={{background: "#1e293b"}} value="Pending">⏳ Pending</option>
+                    <option style={{background: "#1e293b"}} value="In Progress">🔄 In Progress</option>
+                    <option style={{background: "#1e293b"}} value="Resolved">✅ Resolved</option>
                   </select>
                 </div>
               ))
@@ -164,22 +167,22 @@ function AdminDashboard() {
             {DOMAINS.map((domain) => {
               const domainFiles = datasets.filter((d) => d.category === domain);
               return (
-                <div key={domain} style={{ background: "white", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #e5e7eb", paddingBottom: "10px", marginBottom: "15px" }}>
-                    <h3 style={{ margin: 0, color: "#1e3a8a" }}>{domain}</h3>
+                <div key={domain} className="complaint-table" style={{ padding: "25px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "15px", marginBottom: "15px" }}>
+                    <h3 style={{ margin: 0, color: "white" }}>{domain}</h3>
                     <div>
                       <input type="file" id={`upload-${domain}`} style={{ display: "none" }} accept=".csv, .xlsx" onChange={(e) => handleFileUpload(e, domain)} />
-                      <label htmlFor={`upload-${domain}`} style={{ background: uploadingDomain === domain ? "#ccc" : "#2563eb", color: "white", padding: "8px 15px", borderRadius: "5px", cursor: uploadingDomain === domain ? "not-allowed" : "pointer", fontWeight: "bold" }}>
+                      <label htmlFor={`upload-${domain}`} style={{ background: uploadingDomain === domain ? "#64748b" : "linear-gradient(135deg, #2563eb, #06b6d4)", color: "white", padding: "8px 16px", borderRadius: "8px", cursor: uploadingDomain === domain ? "not-allowed" : "pointer", fontWeight: "600", fontSize: "14px" }}>
                         {uploadingDomain === domain ? "Uploading..." : "⬆️ Upload New File"}
                       </label>
                     </div>
                   </div>
-                  {domainFiles.length === 0 ? <p style={{ color: "gray", fontSize: "14px" }}>No files uploaded yet.</p> : 
+                  {domainFiles.length === 0 ? <p style={{ color: "#94a3b8", fontSize: "14px" }}>No files uploaded yet.</p> : 
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                       {domainFiles.map((file) => (
-                        <div key={file.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f9fafb", padding: "10px 15px", borderRadius: "5px", border: "1px solid #e5e7eb" }}>
-                          <span style={{ fontSize: "14px", fontWeight: "bold" }}>📄 {file.name}</span>
-                          <button onClick={() => handleDeleteDataset(file.id)} style={{ background: "transparent", border: "none", color: "#e11d48", cursor: "pointer", fontWeight: "bold", fontSize: "14px" }}>🗑️ Delete</button>
+                        <div key={file.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(0,0,0,0.2)", padding: "12px 18px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                          <span style={{ fontSize: "14px", fontWeight: "600", color: "#e2e8f0" }}>📄 {file.name}</span>
+                          <button onClick={() => handleDeleteDataset(file.id)} style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", color: "#fca5a5", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontWeight: "600", fontSize: "13px" }}>🗑️ Delete</button>
                         </div>
                       ))}
                     </div>
@@ -193,40 +196,42 @@ function AdminDashboard() {
         {/* --- TAB 3: CITIZEN TRACKING --- */}
         {activeTab === "tracking" && (
           <div>
-            {/* Stat Cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "15px", marginBottom: "20px" }}>
-              <div style={{ background: "white", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", textAlign: "center" }}>
-                <h4 style={{ margin: "0 0 10px 0", color: "gray" }}>Total Users</h4>
-                <h2 style={{ margin: 0, color: "#1e3a8a", fontSize: "32px" }}>{tracking.total_users}</h2>
+            {/* Stat Cards (Now Dark Mode) */}
+            <div className="stats-container">
+              <div className="stat-card" style={{ flexDirection: "column", textAlign: "center", padding: "30px" }}>
+                <h4 style={{ margin: "0 0 10px 0", color: "#94a3b8", fontWeight: "500" }}>Total Users</h4>
+                <h2 style={{ margin: 0, color: "#ffffff", fontSize: "36px" }}>{tracking.total_users}</h2>
               </div>
-              <div style={{ background: "white", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", textAlign: "center" }}>
-                <h4 style={{ margin: "0 0 10px 0", color: "gray" }}>Citizens</h4>
-                <h2 style={{ margin: 0, color: "#2563eb", fontSize: "32px" }}>{tracking.total_citizens}</h2>
+              <div className="stat-card" style={{ flexDirection: "column", textAlign: "center", padding: "30px" }}>
+                <h4 style={{ margin: "0 0 10px 0", color: "#94a3b8", fontWeight: "500" }}>Citizens</h4>
+                <h2 style={{ margin: 0, color: "#38bdf8", fontSize: "36px" }}>{tracking.total_citizens}</h2>
               </div>
-              <div style={{ background: "white", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", textAlign: "center" }}>
-                <h4 style={{ margin: "0 0 10px 0", color: "gray" }}>Admins</h4>
-                <h2 style={{ margin: 0, color: "#e11d48", fontSize: "32px" }}>{tracking.total_admins}</h2>
+              <div className="stat-card" style={{ flexDirection: "column", textAlign: "center", padding: "30px" }}>
+                <h4 style={{ margin: "0 0 10px 0", color: "#94a3b8", fontWeight: "500" }}>Admins</h4>
+                <h2 style={{ margin: 0, color: "#f472b6", fontSize: "36px" }}>{tracking.total_admins}</h2>
               </div>
-              <div style={{ background: "white", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", textAlign: "center" }}>
-                <h4 style={{ margin: "0 0 10px 0", color: "gray" }}>Total Logins</h4>
-                <h2 style={{ margin: 0, color: "#16a34a", fontSize: "32px" }}>{tracking.total_logins}</h2>
+              <div className="stat-card" style={{ flexDirection: "column", textAlign: "center", padding: "30px" }}>
+                <h4 style={{ margin: "0 0 10px 0", color: "#94a3b8", fontWeight: "500" }}>Total Logins</h4>
+                <h2 style={{ margin: 0, color: "#34d399", fontSize: "36px" }}>{tracking.total_logins}</h2>
               </div>
             </div>
 
-            {/* User Tracking Table */}
-            <div className="complaint-table" style={{ background: "white", borderRadius: "10px", padding: "20px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}>
-              <h3 style={{ margin: "0 0 15px 0", color: "#1e3a8a" }}>User Activity Log</h3>
-              <div className="table-header" style={{ display: "grid", gridTemplateColumns: "2fr 3fr 1fr 1fr 2fr", fontWeight: "bold", borderBottom: "2px solid #e5e7eb", paddingBottom: "10px", marginBottom: "10px" }}>
+            {/* User Tracking Table (Now Dark Mode) */}
+            <div className="complaint-table">
+              <div style={{ padding: "20px 25px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                <h3 style={{ margin: 0, color: "white" }}>User Activity Log</h3>
+              </div>
+              <div className="table-header" style={{ display: "grid", gridTemplateColumns: "2fr 3fr 1fr 1fr 2fr" }}>
                 <span>Name</span><span>Email</span><span>Role</span><span>Logins</span><span>Last Active</span>
               </div>
-              {tracking.users.length === 0 ? <p>No users found.</p> : 
+              {tracking.users.length === 0 ? <p style={{ padding: "30px", color: "#94a3b8" }}>No users found.</p> : 
                 tracking.users.map((u) => (
-                  <div key={u.id} style={{ display: "grid", gridTemplateColumns: "2fr 3fr 1fr 1fr 2fr", alignItems: "center", borderBottom: "1px solid #f3f4f6", padding: "15px 0" }}>
-                    <span style={{ fontWeight: "bold" }}>{u.name}</span>
-                    <span style={{ color: "gray" }}>{u.email}</span>
-                    <span style={{ color: u.role === "admin" ? "#e11d48" : "#2563eb", fontWeight: "bold" }}>{u.role.toUpperCase()}</span>
-                    <span style={{ fontWeight: "bold" }}>{u.login_count} times</span>
-                    <span style={{ color: "gray", fontSize: "14px" }}>{u.last_login}</span>
+                  <div key={u.id} className="table-row" style={{ display: "grid", gridTemplateColumns: "2fr 3fr 1fr 1fr 2fr" }}>
+                    <span style={{ fontWeight: "600", color: "white" }}>{u.name}</span>
+                    <span style={{ color: "#94a3b8" }}>{u.email}</span>
+                    <span style={{ color: u.role === "admin" ? "#f472b6" : "#38bdf8", fontWeight: "bold" }}>{u.role.toUpperCase()}</span>
+                    <span style={{ fontWeight: "600", color: "#e2e8f0" }}>{u.login_count} times</span>
+                    <span style={{ color: "#94a3b8", fontSize: "14px" }}>{u.last_login}</span>
                   </div>
                 ))
               }
