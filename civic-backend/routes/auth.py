@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import SessionLocal
 import models, schemas
-from datetime import datetime # <-- Added for tracking time
+from datetime import datetime
 
 router = APIRouter()
 
@@ -20,8 +20,17 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    # 🛑 SECURITY LOCK: Force everyone to be a citizen. 
+    # We ignore whatever "role" the frontend or hacker tries to send.
+    safe_role = "citizen"
+    
     # Create new user
-    new_user = models.User(name=user.name, email=user.email, password=user.password, role=user.role)
+    new_user = models.User(
+        name=user.name, 
+        email=user.email, 
+        password=user.password, 
+        role=safe_role 
+    )
     
     # Save to Aiven MySQL database
     db.add(new_user)

@@ -6,8 +6,7 @@ function Signup() {
     name: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    role: "citizen" // Default role
+    confirmPassword: ""
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,7 +34,7 @@ function Signup() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: formData.role, // Send the selected role
+          role: "citizen" // <-- Everyone signs up as a citizen
         }),
       });
 
@@ -49,7 +48,7 @@ function Signup() {
       navigate("/login");
 
     } catch (err) {
-      setError(err.message || "Something went wrong. Is the backend awake?");
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -60,9 +59,9 @@ function Signup() {
       <div className="auth-card">
         <div className="auth-logo">🏛️ CivicConnect</div>
         <h1>Create Account</h1>
-        <p className="auth-subtitle">Join CivicConnect and help improve your community</p>
+        <p className="auth-subtitle">Join CivicConnect</p>
 
-        {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
+        {error && <p style={{ color: "#f87171", textAlign: "center", marginBottom: "15px" }}>{error}</p>}
 
         <form onSubmit={handleSubmit}>
           <label>Full Name</label>
@@ -71,18 +70,6 @@ function Signup() {
           <label>Email Address</label>
           <input type="email" name="email" placeholder="Enter your email" value={formData.email} onChange={handleChange} required />
 
-          {/* 🚨 THIS IS THE DROPDOWN YOU ARE LOOKING FOR */}
-          <label>Register As</label>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            style={{ width: "100%", padding: "12px", marginBottom: "15px", borderRadius: "8px", border: "1px solid #ccc", fontSize: "16px" }}
-          >
-            <option value="citizen">Citizen</option>
-            <option value="admin">Admin</option>
-          </select>
-
           <label>Password</label>
           <input type="password" name="password" placeholder="Create a password" value={formData.password} onChange={handleChange} required />
 
@@ -90,14 +77,13 @@ function Signup() {
           <input type="password" name="confirmPassword" placeholder="Confirm your password" value={formData.confirmPassword} onChange={handleChange} required />
 
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? "Creating Account... (Please wait)" : "Create Account"}
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 
         <p className="auth-footer">
           Already have an account? <Link to="/login">Login</Link>
         </p>
-        <Link to="/" className="back-home">← Back to Home</Link>
       </div>
     </div>
   );
